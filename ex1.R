@@ -1,4 +1,4 @@
-setwd("C:/Users/grzegorz/Documents/ed")
+setwd("/Users/gpietrus/git/arima_examples")
 source("common.R")
 library(forecast)
 library(xts)
@@ -84,8 +84,8 @@ for (split_point in split_points) {
   points(ts_test_forecasted)
 }
 
-model = auto.arima(ts, seasonal=TRUE)
-forecasted = forecast(model, h=12*3, level=forecast_levels)
+model = auto.arima(ts_data, seasonal=TRUE)
+forecasted = forecast(model, h=12*12, level=forecast_levels)
 plot(forecasted)
 
 #todo: podobnie jak w poprzednim
@@ -106,11 +106,13 @@ plot(forecast(model_no_diff))
 ts_data = load_ts("data/seasonal_long.csv")
 period = 288
 harmonics = 1
-forecast_length = 10
+forecast_length = 250
+
 ts_data = ts(coredata(ts_data), frequency=period)
+
 model = tslm(ts_data ~ fourier(ts_data, K = harmonics))
 forecasted = forecast(model, data.frame(fourier(ts_data, K=harmonics,h=forecast_length)))
-plot(forecasted, include=100)
+plot(forecasted, include=1000)
 
 #todo: show the problem of only fourier - average
 #todo: narysowac golego fouriera na tym sszeregu albo pod nim
@@ -125,8 +127,29 @@ plot(ts_data)
 lines(fourier_ts_data, col="red")
 
 #todo: fourier + arima
+ts_data = load_ts("data/seasonal_long.csv")
+period = 288
+harmonics = 1
+forecast_length = 3
 
-#todo: multi time series
+ts_data = ts(coredata(ts_data), frequency=period)
+
+#porownanie prognoz z modelu fouriera i fouriera+arima
+split_points = seq(from=2250, to=2490, length.out=5)
+
+par(mfrow=c(2,1))
+for (split_point in split_points) {
+  print(split_point)
+  ts_data_train = ts(head(ts_data, split_point), frequency=288)
+  fourier_model = Arima(ts_data_train, order=c(0,0,0), xreg=fourier(ts_data_train, K = harmonics))
+  fourier_arima_model = Arima(ts_data_train, order=c(1,1,0), xreg=fourier(ts_data_train, K = harmonics))
+  plot(forecast(fourier_model, xreg=(fourier(ts_data_train, K=harmonics,h=forecast_length))), include=100, main="Fourier model")
+  plot(forecast(fourier_arima_model, xreg=(fourier(ts_data_train, K=harmonics,h=forecast_length))), include=100, main="Fourier + ARIMA model")
+}
+par(mfrow=c(1,1))
+
+
+#todo: multi season
 
   
 #todo: tbats
