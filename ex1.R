@@ -148,10 +148,33 @@ for (split_point in split_points) {
 }
 par(mfrow=c(1,1))
 
+#fourier+arima dla szeregu wielookresowego
+x = seq(from=0,by=0.01,to=20*2*pi)
+msts_data = msts(sin(2*pi/3*x)+3*sin(2*pi/5*x)+rnorm(length(x), mean=0, sd=0.3), seasonal.periods=c(300, 500))
+plot(msts_data)
 
-#todo: multi season
+harmonics = c(1,1)
+order = c(0,0,0)
+model = Arima(msts_data, order=order, xreg=fourier(msts_data, K = harmonics))
+forecast_length = 2000
+forecasted = forecast(model, h=forecast_length,xreg=fourier(msts_data,K=harmonics,h=forecast_length), level=forecast_levels)
+plot(forecasted,include=4000)
 
-  
-#todo: tbats
+#dekompozycja za pomoca modelu TBATS
+#Exponential smoothing + Box-Cox transformation + ARMA errors + trend + season
+#https://www.rdocumentation.org/packages/forecast/versions/8.1/topics/tbats
+?tbats
+ts_data = load_ts("data/2447_2.csv", sep=",")
+ts_data = ts_data+rnorm(length(ts_data), mean=0, sd=200)
+ts_data = ts(ts_data, frequency=24)
+plot(ts_data)
+model = tbats(ts_data, seasonal.periods=c(24), num.cores=4)
+model$ma.coefficients #Moving average
+model$k.vector #liczba czynnikow fouriera
+forecasted = forecast(model, 100)
+plot(forecasted, include=200, main="TBATS forecast")
 
+
+
+#todo: kryteria, bic, bicc, aic, co oznaczaja
 #1.csv - bardzo gesty time series
