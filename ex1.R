@@ -79,11 +79,12 @@ lines(ts_test)
 ts_data = load_ts("data/2447_1.csv",sep=",")
 plot(ts_data) 
 
-split_points = seq(from=280, by=1, to=330)
+split_points = seq(from=280, to=330, length=10)
 
 for (split_point in split_points) {
-  ts_train = head(ts_data, n=split_point)
-  ts_test = tail(ts_data, n=length(ts_data)-split_point)
+  print(split_point)
+  ts_train = ts(head(ts_data, n=split_point), frequency=12)
+  ts_test = ts(tail(ts_data, n=length(ts_data)-split_point), frequency=12, start=end(ts_train)[1]+end(ts_train)[2]/12)
   
   forecast_length = 3
   model = auto.arima(ts_train, seasonal=TRUE)
