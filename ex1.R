@@ -184,3 +184,30 @@ model$ma.coefficients #moving average
 model$k.vector #liczba czynnikow fouriera
 forecasted = forecast(model, 100)
 plot(forecasted, include=200, main="TBATS forecast")
+
+###----------9-----------
+#prosta detekcja anomalii
+ts_data = AirPassengers
+plot(ts_data)
+
+#TODO: ADD anomalies to some observations between 120 and 140
+
+split_points = seq(from=120, by=1, to=140)
+for (split_point in split_points) {
+  print(split_point)
+  ts_train = ts(head(ts_data, n=split_point), frequency=12)
+  ts_test = ts(tail(ts_data, n=length(ts_data)-split_point), frequency=12, start=end(ts_train)[1]+end(ts_train)[2]/12)
+  model = auto.arima(ts_train)
+  forecasted = forecast(model, 1, level=forecast_levels)
+  plot(forecasted)
+  points(ts_test)
+  
+  lower_boundaries = forecasted$lower
+  upper_boundaries = forecasted$upper
+  next_sample = ts_test[1]
+  print(next_sample)
+  if (IS_ANOMALY) {#TODO: TO BE IMPLEMENTED
+    abline(v=index(ts_test)[1], col="red")
+    print("ANOMALY!!!")
+  } 
+}
