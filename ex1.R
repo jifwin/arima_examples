@@ -1,5 +1,5 @@
 #setup
-setwd("/Users/gpietrus/git/arima_examples")
+setwd("C:/Users/grzegorz/Documents/ed/")
 source("libs.R")
 
 #biblioteki
@@ -164,8 +164,7 @@ msts_data = msts(sin(2*pi/3*x)+3*sin(2*pi/5*x)+rnorm(length(x), mean=0, sd=0.3),
 plot(msts_data)
 
 harmonics = c(1,1)
-order = c(0,0,0)
-model = Arima(msts_data, order=order, xreg=fourier(msts_data, K = harmonics))
+model = auto.arima(msts_data, xreg=fourier(msts_data, K = harmonics))
 forecast_length = 2000
 forecasted = forecast(model, h=forecast_length,xreg=fourier(msts_data,K=harmonics,h=forecast_length), level=forecast_levels)
 plot(forecasted,include=4000)
